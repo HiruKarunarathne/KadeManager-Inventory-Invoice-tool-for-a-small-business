@@ -23,6 +23,14 @@ const productSchema = new mongoose.Schema(
       trim: true,
       // e.g. 'kg', 'g', 'L', 'ml', 'pcs', 'pack'
     },
+    unitType: {
+      type: String,
+      enum: {
+        values: ['measured', 'countable'],
+        message: 'unitType must be either measured or countable',
+      },
+      default: 'countable',
+    },
     quantity: {
       type: Number,
       required: [true, 'Quantity is required'],

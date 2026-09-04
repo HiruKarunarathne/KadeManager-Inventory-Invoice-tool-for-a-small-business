@@ -21,7 +21,16 @@ const invoiceItemSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       required: [true, 'Item quantity is required'],
-      min: [1, 'Quantity must be at least 1'],
+      min: [0.01, 'Quantity must be at least 0.01'],
+    },
+    unit: {
+      type: String,
+      trim: true,
+    },
+    unitType: {
+      type: String,
+      enum: ['measured', 'countable'],
+      default: 'countable',
     },
     unitPrice: {
       // Snapshot of price at time of sale

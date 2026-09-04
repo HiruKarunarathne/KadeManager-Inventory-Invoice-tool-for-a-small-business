@@ -64,12 +64,12 @@ const NewInvoicePage = () => {
       if (existingIndex > -1) {
         // Product exists: merge and update quantity
         const existing = prevItems[existingIndex];
-        const combinedQty = existing.quantity + itemToAdd.quantity;
+        const combinedQty = Math.round((existing.quantity + itemToAdd.quantity) * 100) / 100;
 
         // Verify combined quantity does not exceed product's available inventory
         if (combinedQty > itemToAdd.availableStock) {
           setError(
-            `Cannot add ${itemToAdd.quantity} more "${itemToAdd.productName}". Available stock is ${itemToAdd.availableStock}, and you already have ${existing.quantity} in cart.`
+            `Cannot add ${itemToAdd.quantity} ${itemToAdd.unit || ''} more "${itemToAdd.productName}". Available stock is ${itemToAdd.availableStock} ${itemToAdd.unit || ''}, and you already have ${existing.quantity} in cart.`
           );
           return prevItems;
         }
@@ -79,12 +79,12 @@ const NewInvoicePage = () => {
           ...existing,
           quantity: combinedQty,
         };
-        setInlineMsg(`Updated "${itemToAdd.productName}" quantity to ${combinedQty}`);
+        setInlineMsg(`Updated "${itemToAdd.productName}" quantity to ${combinedQty} ${itemToAdd.unit || ''}`);
         return updated;
       }
 
       // New product: add row to cart
-      setInlineMsg(`Added "${itemToAdd.productName}" to cart`);
+      setInlineMsg(`Added ${itemToAdd.quantity} ${itemToAdd.unit || ''} of "${itemToAdd.productName}" to cart`);
       return [...prevItems, itemToAdd];
     });
   };

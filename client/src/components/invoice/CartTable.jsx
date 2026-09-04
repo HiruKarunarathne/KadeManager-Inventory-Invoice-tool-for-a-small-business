@@ -1,12 +1,20 @@
 // src/components/invoice/CartTable.jsx
 // Displays items currently added to the invoice cart.
+// Shows unambiguous quantity with units (e.g. "0.5 kg", "2 pcs") and precise currency totals.
 // Member 3 owns this component.
 
+const formatCurrency = (amount) => {
+  const num = Number(amount || 0);
+  return num.toLocaleString('en-LK', {
+    minimumFractionDigits: num % 1 !== 0 ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+};
+
 const CartTable = ({ items, onRemoveItem }) => {
-  const grandTotal = items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0
-  );
+  const grandTotal = Math.round(
+    items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0) * 100
+  ) / 100;
 
   if (items.length === 0) {
     return (
@@ -33,44 +41,45 @@ const CartTable = ({ items, onRemoveItem }) => {
           <thead>
             <tr>
               <th>Item</th>
-              <th style={{ textAlign: 'right' }}>Price (LKR)</th>
-              <th style={{ textAlign: 'center' }}>Qty</th>
-              <th style={{ textAlign: 'right' }}>Total (LKR)</th>
+              <th style={{ textAlign: 'right' }}>Rate (LKR)</th>
+              <th style={{ textAlign: 'center' }}>Quantity</th>
+              <th style={{ textAlign: 'right' }}>Line Total (LKR)</th>
               <th style={{ textAlign: 'center' }}>Action</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => {
-              const lineTotal = item.unitPrice * item.quantity;
+              const lineTotal = Math.round(item.unitPrice * item.quantity * 100) / 100;
+              const isMeasured = item.unitType === 'measured';
+
               return (
                 <tr key={item.productId}>
                   <td>
                     <strong>{item.productName}</strong>
-                    {item.unit && (
-                      <span
-                        style={{
-                          display: 'block',
-                          fontSize: '0.75rem',
-                          color: 'var(--color-text-muted)',
-                        }}
-                      >
-                        Unit: {item.unit}
-                      </span>
-                    )}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.15rem' }}>
+                      {isMeasured ? '⚖️ Measured by weight/volume' : '📦 Whole unit package'}
+                    </div>
                   </td>
-                  <td style={{ textAlign: 'right' }}>
-                    {item.unitPrice.toLocaleString()}
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    {formatCurrency(item.unitPrice)}
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block' }}>
+                      per {item.unit || 'unit'}
+                    </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
+                  <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <span
                       style={{
-                        background: 'var(--color-surface-2)',
-                        padding: '0.2rem 0.6rem',
+                        background: isMeasured ? 'rgba(56, 189, 248, 0.15)' : 'var(--color-surface-2)',
+                        color: isMeasured ? 'var(--color-accent)' : 'var(--color-text)',
+                        border: '1px solid var(--color-border)',
+                        padding: '0.25rem 0.65rem',
                         borderRadius: '6px',
                         fontWeight: 600,
+                        fontSize: '0.9rem',
+                        display: 'inline-block',
                       }}
                     >
-                      {item.quantity}
+                      {item.quantity} {item.unit || ''}
                     </span>
                   </td>
                   <td
@@ -78,9 +87,10 @@ const CartTable = ({ items, onRemoveItem }) => {
                       textAlign: 'right',
                       fontWeight: 600,
                       color: 'var(--color-accent)',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {lineTotal.toLocaleString()}
+                    {formatCurrency(lineTotal)}
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <button
@@ -105,7 +115,7 @@ const CartTable = ({ items, onRemoveItem }) => {
         <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginRight: '1rem' }}>
           Grand Total:
         </span>
-        <span>LKR {grandTotal.toLocaleString()}</span>
+        <span>LKR {formatCurrency(grandTotal)}</span>
       </div>
     </div>
   );

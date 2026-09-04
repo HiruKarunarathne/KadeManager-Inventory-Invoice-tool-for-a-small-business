@@ -46,14 +46,15 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
   const fetchedProducts = [];
 
   for (const item of items) {
-    const qty = Number(item.quantity);
     if (!item.productId) {
       const err = new Error('Each item must contain a valid productId');
       err.statusCode = 400;
       throw err;
     }
-    if (!qty || qty <= 0 || !Number.isInteger(qty)) {
-      const err = new Error('Item quantity must be a positive whole number');
+
+    const rawQty = Number(item.quantity);
+    if (!rawQty || rawQty <= 0 || isNaN(rawQty)) {
+      const err = new Error('Item quantity must be a positive number greater than 0');
       err.statusCode = 400;
       throw err;
     }
@@ -65,13 +66,33 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
       throw err;
     }
 
-    if (product.quantity < qty) {
+    const unitType = product.unitType || 'countable';
+    let validatedQty;
+
+    if (unitType === 'countable') {
+      if (!Number.isInteger(rawQty)) {
+        const err = new Error(`Quantity for "${product.name}" must be a whole number`);
+        err.statusCode = 400;
+        throw err;
+      }
+      validatedQty = rawQty;
+    } else {
+      // Measured products allow decimals rounded to 2 decimal places (e.g. 0.5, 1.25)
+      validatedQty = Math.round(rawQty * 100) / 100;
+      if (validatedQty <= 0) {
+        const err = new Error(`Quantity for "${product.name}" must be at least 0.01 ${product.unit}`);
+        err.statusCode = 400;
+        throw err;
+      }
+    }
+
+    if (product.quantity < validatedQty) {
       stockShortages.push(
-        `"${product.name}" (requested: ${qty} ${product.unit}, available: ${product.quantity} ${product.unit})`
+        `"${product.name}" (requested: ${validatedQty} ${product.unit}, available: ${product.quantity} ${product.unit})`
       );
     }
 
-    fetchedProducts.push({ product, quantity: qty });
+    fetchedProducts.push({ product, quantity: validatedQty });
   }
 
   // If any product lacks sufficient stock, halt and deduct NOTHING
@@ -86,20 +107,22 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
   const invoiceItems = [];
 
   for (const { product, quantity } of fetchedProducts) {
-    const lineTotal = product.unitPrice * quantity;
-    total += lineTotal;
+    const lineTotal = Math.round(product.unitPrice * quantity * 100) / 100;
+    total = Math.round((total + lineTotal) * 100) / 100;
 
     // Snapshot details into invoice item
     invoiceItems.push({
       productId: product._id,
       productName: product.name,
+      unit: product.unit,
+      unitType: product.unitType || 'countable',
       quantity,
       unitPrice: product.unitPrice,
       lineTotal,
     });
 
-    // Deduct stock
-    product.quantity -= quantity;
+    // Deduct stock (rounding to 2 decimals for measured quantities to prevent float drift)
+    product.quantity = Math.round((product.quantity - quantity) * 100) / 100;
     await product.save();
   }
 
@@ -189,7 +212,7 @@ const voidInvoice = async (id, userId) => {
     if (item.productId) {
       const product = await Product.findById(item.productId);
       if (product) {
-        product.quantity += item.quantity;
+        product.quantity = Math.round((product.quantity + item.quantity) * 100) / 100;
         await product.save();
       }
     }
