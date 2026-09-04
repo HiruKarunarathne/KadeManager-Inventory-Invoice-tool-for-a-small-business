@@ -5,12 +5,19 @@
 const Product = require('../models/Product');
 
 /**
- * Fetch all products (optionally filtered by category)
+ * Fetch all products with search and filtering
  */
-const getAllProducts = async (filters = {}) => {
-  const query = {};
-  if (filters.category) query.category = filters.category;
-  return await Product.find(query).sort({ name: 1 });
+const getAllProducts = async (query = {}) => {
+  const { search, category, lowStock } = query;
+  const filter = {};
+
+  if (search) filter.name = { $regex: search, $options: 'i' };
+  if (category) filter.category = category;
+  if (lowStock === 'true' || lowStock === true) {
+    filter.$expr = { $lte: ['$quantity', '$lowStockThreshold'] };
+  }
+
+  return await Product.find(filter).sort({ name: 1 });
 };
 
 /**
@@ -30,17 +37,11 @@ const getProductById = async (id) => {
  * Create a new product
  */
 const createProduct = async (data) => {
-  const { name, category, unit, quantity, unitPrice, lowStockThreshold } = data;
-  if (!name || !category || !unit || unitPrice == null) {
-    const err = new Error('name, category, unit, and unitPrice are required');
-    err.statusCode = 400;
-    throw err;
-  }
-  return await Product.create({ name, category, unit, quantity, unitPrice, lowStockThreshold });
+  return await Product.create(data);
 };
 
 /**
- * Update a product (owner and staff can both update)
+ * Update a product
  */
 const updateProduct = async (id, data) => {
   const product = await Product.findByIdAndUpdate(id, data, {
@@ -65,14 +66,13 @@ const deleteProduct = async (id) => {
     err.statusCode = 404;
     throw err;
   }
-  return { message: 'Product deleted successfully' };
+  return product;
 };
 
 /**
  * Get all low-stock products (quantity <= lowStockThreshold)
  */
 const getLowStockProducts = async () => {
-  // Use aggregation to compare quantity vs threshold field
   return await Product.find({ $expr: { $lte: ['$quantity', '$lowStockThreshold'] } });
 };
 

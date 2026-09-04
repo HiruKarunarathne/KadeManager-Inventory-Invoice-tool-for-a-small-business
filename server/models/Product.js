@@ -10,18 +10,27 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Product name is required'],
       trim: true,
+      maxlength: [150, 'Product name cannot exceed 150 characters'],
     },
     category: {
       type: String,
       required: [true, 'Category is required'],
       trim: true,
-      // e.g. 'Dry Goods', 'Beverages', 'Dairy', 'Cleaning', 'Snacks'
+      // e.g. 'Dry Goods', 'Beverages', 'Dairy', 'Cleaning', 'Snacks', etc.
     },
     unit: {
       type: String,
       required: [true, 'Unit is required'],
       trim: true,
-      // e.g. 'kg', 'g', 'L', 'ml', 'pcs', 'pack'
+      // e.g. 'kg', 'g', 'l', 'ml', 'pcs', 'pack', 'bottle', 'tin', 'can'
+    },
+    unitType: {
+      type: String,
+      enum: {
+        values: ['measured', 'countable'],
+        message: 'unitType must be either measured or countable',
+      },
+      default: 'countable',
     },
     quantity: {
       type: Number,
@@ -36,8 +45,12 @@ const productSchema = new mongoose.Schema(
     },
     lowStockThreshold: {
       type: Number,
-      default: 5,
+      default: 10,
       min: [0, 'Low stock threshold cannot be negative'],
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {

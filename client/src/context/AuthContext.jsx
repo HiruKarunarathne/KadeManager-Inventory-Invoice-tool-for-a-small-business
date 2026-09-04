@@ -42,9 +42,16 @@ export const AuthProvider = ({ children }) => {
 
   const isOwner = () => user?.role === 'owner';
   const isStaff = () => user?.role === 'staff';
+  const hasRole = (allowedRoles) => {
+    if (!user) return false;
+    if (Array.isArray(allowedRoles)) {
+      return allowedRoles.includes(user.role);
+    }
+    return user.role === allowedRoles;
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, isOwner, isStaff }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, isOwner, isStaff, hasRole }}>
       {children}
     </AuthContext.Provider>
   );
