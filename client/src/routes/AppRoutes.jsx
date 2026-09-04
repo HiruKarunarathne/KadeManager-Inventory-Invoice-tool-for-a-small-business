@@ -15,16 +15,20 @@ const AppRoutes = () => (
     {/* Public */}
     <Route path="/login" element={<LoginPage />} />
 
-    {/* Protected: any logged-in user (owner OR staff) */}
-    <Route element={<ProtectedRoute />}>
+    {/* Protected: OWNER ONLY */}
+    <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
       <Route path="/dashboard" element={<DashboardPage />} />
+    </Route>
+
+    {/* Protected: owner + staff */}
+    <Route element={<ProtectedRoute allowedRoles={['owner', 'staff']} />}>
       <Route path="/inventory" element={<InventoryPage />} />
       <Route path="/invoices/new" element={<NewInvoicePage />} />
       <Route path="/invoices" element={<InvoiceHistoryPage />} />
     </Route>
 
-    {/* Catch-all: redirect to dashboard */}
-    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    {/* Catch-all: /inventory is accessible to all roles */}
+    <Route path="*" element={<Navigate to="/inventory" replace />} />
   </Routes>
 );
 

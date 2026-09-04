@@ -22,7 +22,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   // Logged in but role not permitted
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/inventory" replace />;
   }
 
   return <Outlet />;
