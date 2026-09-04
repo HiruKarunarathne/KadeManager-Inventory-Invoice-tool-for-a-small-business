@@ -1,0 +1,32 @@
+.page { padding: 1.5rem 2rem; max-width: 760px; }
+.title { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 1.25rem; }
+.form { display: flex; flex-direction: column; gap: 1.25rem; }
+.field { display: flex; flex-direction: column; gap: 0.4rem; }
+.label { font-size: 0.82rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
+.input, .select {
+  background: #1e1e30;
+  border: 1px solid #2d2d44;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.input:focus, .select:focus { outline: none; border-color: #4f46e5; }
+.section {}
+.sectionTitle { font-size: 0.9rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+.itemRow { display: grid; grid-template-columns: 1fr 80px 120px 36px; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.qtyInput { background: #1e1e30; border: 1px solid #2d2d44; border-radius: 8px; padding: 0.6rem 0.5rem; color: #e2e8f0; text-align: center; font-size: 0.9rem; }
+.subtotal { color: #34d399; font-weight: 600; font-size: 0.9rem; text-align: right; }
+.removeBtn { background: transparent; border: 1px solid #ef444440; color: #f87171; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; transition: background 0.15s; }
+.removeBtn:hover { background: #ef444420; }
+.addItemBtn { margin-top: 0.25rem; padding: 0.4rem 1rem; background: transparent; border: 1px dashed #4f46e550; border-radius: 8px; color: #818cf8; font-size: 0.85rem; cursor: pointer; transition: background 0.15s; }
+.addItemBtn:hover { background: #4f46e510; }
+.totalRow { display: flex; justify-content: flex-end; align-items: center; gap: 1rem; padding: 1rem; background: #1e1e30; border-radius: 10px; border: 1px solid #2d2d44; }
+.totalLabel { font-size: 1rem; font-weight: 600; color: #94a3b8; }
+.totalAmount { font-size: 1.4rem; font-weight: 700; color: #34d399; }
+.submitBtn { padding: 0.75rem; background: #4f46e5; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.submitBtn:hover:not(:disabled) { background: #4338ca; }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }

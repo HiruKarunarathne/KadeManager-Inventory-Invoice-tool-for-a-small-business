@@ -1,0 +1,92 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #2d2d44;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo { font-size: 1.4rem; }
+
+.shopName {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+  letter-spacing: 0.02em;
+}
+
+.navLinks {
+  display: flex;
+  list-style: none;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navLinks a {
+  display: block;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navLinks a:hover { background: #2d2d44; color: #e2e8f0; }
+.navLinks a.active { background: #4f46e5; color: #fff; }
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.userName {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.roleBadge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.roleBadge.owner { background: #7c3aed20; color: #a78bfa; border: 1px solid #7c3aed40; }
+.roleBadge.staff { background: #0d9488; color: #ccfbf1; border: 1px solid #0d9488; }
+
+.logoutBtn {
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #374151;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.logoutBtn:hover { background: #ef444420; color: #f87171; border-color: #ef4444; }
