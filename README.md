@@ -17,7 +17,7 @@ While this manual approach is simple and familiar, it can lead to several operat
 * Risk of errors and loss of paper-based records
 * Difficulty managing access to business information
 
-**Kade Manager** addresses these challenges by providing a centralized digital platform for inventory, invoicing, reporting, and day-to-day store management.
+**Kade Manager** addresses these challenges by providing a digital platform for inventory, invoicing, reporting, and day-to-day store management.
 
 ---
 
