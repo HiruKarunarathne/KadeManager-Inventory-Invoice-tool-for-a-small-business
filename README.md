@@ -51,13 +51,11 @@ The project development process was supported by:
 ---
 
 ## 👥 Team Members
-
-| Student ID     | Name               | Responsibility                     |
-| -------------- | ------------------ | ---------------------------------- |
-| **IT24102535** | Karunarathne BMAHK | Dashboard & Problem Framing        |
-| **IT24100612** | Manvindu RAT       | Invoice Creation Engine            |
-| **IT24101462** | Cooray NTY         | Inventory Management               |
-| **IT24102022** | Ravisara AHTM      | Reports, Navigation & Shared Layer |
+                    
+ **IT24102535** | Karunarathne BMAHK | Dashboard & Problem Framing        
+ **IT24100612** | Manvindu RAT       | Invoice Creation Engine           
+ **IT24101462** | Cooray NTY         | Inventory Management               
+ **IT24102022** | Ravisara AHTM      | Reports, Navigation & Shared Layer 
 
 ---
 
