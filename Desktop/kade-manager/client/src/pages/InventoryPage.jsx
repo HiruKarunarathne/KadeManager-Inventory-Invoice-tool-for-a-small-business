@@ -1,19 +1,21 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getProducts, createProduct, deleteProduct } from '../api/inventoryApi';
+import { getProducts, createProduct, updateProduct, deleteProduct } from '../api/inventoryApi';
 import Loader from '../components/shared/Loader';
 import ErrorBanner from '../components/shared/ErrorBanner';
 
 export default function InventoryPage() {
-  const { role, hasRole } = useAuth();
+  const { user, hasRole } = useAuth();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
 
-  // New product form state
+  // Modal State for Add & Edit
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     category: 'Groceries',
@@ -22,7 +24,8 @@ export default function InventoryPage() {
     unitPrice: 100,
     lowStockThreshold: 5,
   });
-  const [creating, setCreating] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchInventory = useCallback(async () => {
     try {
@@ -31,7 +34,7 @@ export default function InventoryPage() {
       const data = await getProducts({ search: searchTerm });
       setProducts(data.products || []);
     } catch (err) {
-      setError(err.message || 'Failed to load inventory');
+      setError(err.message || 'Failed to load inventory from server');
     } finally {
       setLoading(false);
     }
@@ -41,39 +44,148 @@ export default function InventoryPage() {
     fetchInventory();
   }, [fetchInventory]);
 
-  const handleCreate = async (e) => {
+  // Open modal for Adding a new product
+  const handleOpenAddModal = () => {
+    setEditingProductId(null);
+    setFormData({
+      name: '',
+      category: 'Groceries',
+      unit: 'pcs',
+      quantity: 10,
+      unitPrice: 100,
+      lowStockThreshold: 5,
+    });
+    setFormError('');
+    setIsModalOpen(true);
+  };
+
+  // Open modal for Editing an existing product
+  const handleOpenEditModal = (product) => {
+    setEditingProductId(product._id);
+    setFormData({
+      name: product.name || '',
+      category: product.category || 'Groceries',
+      unit: product.unit || 'pcs',
+      quantity: product.quantity ?? product.stockQuantity ?? 0,
+      unitPrice: product.unitPrice ?? product.price ?? 0,
+      lowStockThreshold: product.lowStockThreshold ?? 5,
+    });
+    setFormError('');
+    setIsModalOpen(true);
+  };
+
+  // Frontend Form Validation (prevent empty strings, negative numbers)
+  const validateForm = () => {
+    if (!formData.name || !formData.name.trim()) {
+      return 'Product name cannot be empty.';
+    }
+    if (!formData.category || !formData.category.trim()) {
+      return 'Category cannot be empty.';
+    }
+    if (!formData.unit || !formData.unit.trim()) {
+      return 'Unit cannot be empty.';
+    }
+    const priceNum = Number(formData.unitPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      return 'Price must be a valid positive number greater than 0.';
+    }
+    const qtyNum = Number(formData.quantity);
+    if (isNaN(qtyNum) || qtyNum < 0) {
+      return 'Quantity cannot be a negative number (must be 0 or greater).';
+    }
+    return null;
+  };
+
+  // Submit Handler for Add / Edit
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
+
+    // 1. Frontend validation before submission
+    const validationErr = validateForm();
+    if (validationErr) {
+      setFormError(validationErr);
+      return;
+    }
+
     try {
-      setCreating(true);
-      await createProduct(formData);
-      setShowAddModal(false);
-      setFormData({
-        name: '',
-        category: 'Groceries',
-        unit: 'pcs',
-        quantity: 10,
-        unitPrice: 100,
-        lowStockThreshold: 5,
-      });
+      setIsSubmitting(true);
+      const payload = {
+        name: formData.name.trim(),
+        category: formData.category.trim(),
+        unit: formData.unit.trim(),
+        price: Number(formData.unitPrice),
+        unitPrice: Number(formData.unitPrice),
+        stockQuantity: Number(formData.quantity),
+        quantity: Number(formData.quantity),
+        lowStockThreshold: Number(formData.lowStockThreshold) || 5,
+      };
+
+      if (editingProductId) {
+        await updateProduct(editingProductId, payload);
+        setSuccessMessage('Product updated successfully!');
+      } else {
+        await createProduct(payload);
+        setSuccessMessage('Product created successfully!');
+      }
+
+      setIsModalOpen(false);
       await fetchInventory();
+
+      setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err) {
-      setError(err.message || 'Failed to create product');
+      // 2. Display backend validation error messages gracefully
+      setFormError(err.message || 'Server error occurred while saving product');
     } finally {
-      setCreating(false);
+      setIsSubmitting(false);
     }
   };
 
+  // Delete Handler
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}" from inventory?`)) {
+    if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
       return;
     }
     try {
+      setError('');
       await deleteProduct(id);
+      setSuccessMessage(`"${name}" was deleted successfully.`);
       await fetchInventory();
+      setTimeout(() => setSuccessMessage(''), 4000);
     } catch (err) {
-      setError(err.message || 'Failed to delete product');
+      setError(err.message || 'Failed to delete product from server.');
     }
   };
+
+  // 3. Stock Badges:
+  // - Green badge for "In Stock" (quantity > 10)
+  // - Yellow badge for "Low Stock" (quantity between 1 and 10)
+  // - Red badge for "Out of Stock" (quantity === 0)
+  const renderStockBadge = (quantity) => {
+    const qty = Number(quantity);
+    if (qty === 0) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+          ● Out of Stock
+        </span>
+      );
+    }
+    if (qty >= 1 && qty <= 10) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
+          ● Low Stock ({qty})
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+        ● In Stock ({qty})
+      </span>
+    );
+  };
+
+  // 4. Role-based UI rendering: Hide 'Edit' and 'Delete' buttons completely if user.role === 'staff'
+  const isOwner = hasRole('owner') && user?.role !== 'staff';
 
   return (
     <div className="space-y-6">
@@ -85,9 +197,9 @@ export default function InventoryPage() {
         </div>
 
         {/* Owner-only Add Product Button */}
-        {hasRole('owner') && (
+        {isOwner && (
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={handleOpenAddModal}
             className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition"
           >
             + Add New Product
@@ -95,7 +207,24 @@ export default function InventoryPage() {
         )}
       </div>
 
+      {/* Backend & Global Error Alert */}
       <ErrorBanner message={error} onClose={() => setError('')} />
+
+      {/* Success Toast / Alert */}
+      {successMessage && (
+        <div className="rounded-lg bg-emerald-50 p-4 border border-emerald-200 text-emerald-800 text-sm font-semibold flex justify-between items-center animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span>✅</span>
+            <span>{successMessage}</span>
+          </div>
+          <button
+            onClick={() => setSuccessMessage('')}
+            className="text-emerald-600 hover:text-emerald-800 text-xs font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Filter / Search Bar */}
       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
@@ -133,89 +262,95 @@ export default function InventoryPage() {
                   <th className="px-6 py-3 text-left">Product</th>
                   <th className="px-6 py-3 text-left">Category</th>
                   <th className="px-6 py-3 text-right">Unit Price (LKR)</th>
-                  <th className="px-6 py-3 text-right">In Stock</th>
-                  <th className="px-6 py-3 text-center">Status</th>
-                  {/* Action column header visible only if owner */}
-                  {hasRole('owner') && (
+                  <th className="px-6 py-3 text-right">Quantity</th>
+                  <th className="px-6 py-3 text-center">Stock Status</th>
+                  {/* Action column header visible only for owner */}
+                  {isOwner && (
                     <th className="px-6 py-3 text-right">Actions</th>
                   )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
-                {products.map((item) => {
-                  const isLow = item.quantity <= item.lowStockThreshold;
-                  return (
-                    <tr key={item._id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                        {item.name}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                        {item.category}
-                      </td>
-                      <td className="px-6 py-4 text-right font-semibold text-gray-900 whitespace-nowrap">
-                        LKR {Number(item.unitPrice).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-right whitespace-nowrap">
-                        <span className="font-bold text-gray-900">{item.quantity}</span>{' '}
-                        <span className="text-xs text-gray-400 font-normal">{item.unit}</span>
-                      </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap">
-                        {isLow ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                            ⚠️ Low Stock ({item.quantity})
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                            Healthy
-                          </span>
-                        )}
-                      </td>
+                {products.map((item) => (
+                  <tr key={item._id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                      {item.name}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
+                      {item.category}
+                    </td>
+                    <td className="px-6 py-4 text-right font-semibold text-gray-900 whitespace-nowrap">
+                      LKR {Number(item.unitPrice ?? item.price ?? 0).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                      <span className="font-bold text-gray-900">
+                        {item.quantity ?? item.stockQuantity ?? 0}
+                      </span>{' '}
+                      <span className="text-xs text-gray-400 font-normal">{item.unit || 'pcs'}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                      {renderStockBadge(item.quantity ?? item.stockQuantity ?? 0)}
+                    </td>
 
-                      {/* ROLE GATING: Hide delete if user.role === 'staff' */}
-                      {hasRole('owner') && (
-                        <td className="px-6 py-4 text-right whitespace-nowrap">
-                          <button
-                            onClick={() => handleDelete(item._id, item.name)}
-                            className="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded transition"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
+                    {/* ROLE-BASED UI RENDERING: Completely hide Edit and Delete if staff */}
+                    {isOwner && (
+                      <td className="px-6 py-4 text-right whitespace-nowrap space-x-2">
+                        <button
+                          onClick={() => handleOpenEditModal(item)}
+                          className="text-xs font-semibold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded transition border border-amber-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item._id, item.name)}
+                          className="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded transition border border-red-200"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* Add Product Modal (Owner Only) */}
-      {showAddModal && hasRole('owner') && (
+      {/* Add / Edit Product Modal (Owner Only) */}
+      {isModalOpen && isOwner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 border border-gray-100">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Add New Inventory Item</h2>
+              <h2 className="text-lg font-bold text-gray-900">
+                {editingProductId ? 'Edit Product' : 'Add New Inventory Item'}
+              </h2>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => setIsModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 text-xl font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-4">
+            {/* Modal Error Alert for Validation / Backend Errors */}
+            {formError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                  Product Name
+                  Product Name *
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Anchor Butter 200g"
+                  placeholder="e.g. Anchor Milk Powder 400g"
                   className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
@@ -223,23 +358,22 @@ export default function InventoryPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                    Category
+                    Category *
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="e.g. Dairy / Biscuits"
                     className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                    Unit
+                    Unit *
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
                     placeholder="pcs / pack / kg"
@@ -251,37 +385,36 @@ export default function InventoryPage() {
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                    Initial Qty
+                    Quantity (≥ 0) *
                   </label>
                   <input
                     type="number"
-                    required
                     min="0"
+                    step="1"
                     value={formData.quantity}
-                    onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                    Price (LKR)
+                    Price LKR (&gt; 0) *
                   </label>
                   <input
                     type="number"
-                    required
-                    min="0"
+                    min="0.01"
+                    step="any"
                     value={formData.unitPrice}
-                    onChange={(e) => setFormData({ ...formData, unitPrice: Number(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, unitPrice: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
-                    Low Alert
+                    Low Stock Alert
                   </label>
                   <input
                     type="number"
-                    required
                     min="0"
                     value={formData.lowStockThreshold}
                     onChange={(e) =>
@@ -295,17 +428,17 @@ export default function InventoryPage() {
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={creating}
-                  className="px-4 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition disabled:opacity-50"
                 >
-                  {creating ? 'Saving...' : 'Save Product'}
+                  {isSubmitting ? 'Saving...' : editingProductId ? 'Update Product' : 'Create Product'}
                 </button>
               </div>
             </form>
