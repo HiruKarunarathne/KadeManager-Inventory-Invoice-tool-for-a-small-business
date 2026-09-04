@@ -9,15 +9,18 @@ const Product = require('../models/Product');
  */
 const getAllProducts = async (query = {}) => {
   const { search, category, lowStock } = query;
-  const filter = {};
+  const filter = { isActive: true };
 
   if (search) filter.name = { $regex: search, $options: 'i' };
   if (category) filter.category = category;
+
+  const products = await Product.find(filter).sort({ name: 1 });
+
   if (lowStock === 'true' || lowStock === true) {
-    filter.$expr = { $lte: ['$quantity', '$lowStockThreshold'] };
+    return products.filter((p) => p.quantity <= p.lowStockThreshold);
   }
 
-  return await Product.find(filter).sort({ name: 1 });
+  return products;
 };
 
 /**
@@ -25,7 +28,7 @@ const getAllProducts = async (query = {}) => {
  */
 const getProductById = async (id) => {
   const product = await Product.findById(id);
-  if (!product) {
+  if (!product || !product.isActive) {
     const err = new Error('Product not found');
     err.statusCode = 404;
     throw err;
@@ -57,23 +60,28 @@ const updateProduct = async (id, data) => {
 };
 
 /**
- * Delete a product — OWNER ONLY (enforced at route level via roleCheck)
+ * Soft-delete a product — OWNER ONLY (enforced at route level via roleCheck)
  */
 const deleteProduct = async (id) => {
-  const product = await Product.findByIdAndDelete(id);
+  const product = await Product.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { new: true }
+  );
   if (!product) {
     const err = new Error('Product not found');
     err.statusCode = 404;
     throw err;
   }
-  return product;
+  return { message: `Product "${product.name}" removed` };
 };
 
 /**
  * Get all low-stock products (quantity <= lowStockThreshold)
  */
 const getLowStockProducts = async () => {
-  return await Product.find({ $expr: { $lte: ['$quantity', '$lowStockThreshold'] } });
+  const products = await Product.find({ isActive: true });
+  return products.filter((p) => p.quantity <= p.lowStockThreshold);
 };
 
 module.exports = {

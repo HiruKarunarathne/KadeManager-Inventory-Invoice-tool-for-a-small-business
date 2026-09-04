@@ -5,25 +5,31 @@
 // Usage (must be used AFTER protect middleware):
 //   router.delete('/:id', protect, roleCheck(['owner']), asyncWrapper(deleteProduct))
 //
-// roleCheck(['owner'])        → only the shop owner can access
-// roleCheck(['owner','staff'])→ both owner and staff can access (same as just using protect)
+// roleCheck(['owner'])         → only the shop owner can access
+// roleCheck(['owner','staff']) → both owner and staff can access (same as just using protect)
 
-const roleCheck = (allowedRoles) => (req, res, next) => {
-  if (!req.user) {
-    const err = new Error('Not authenticated. Use protect middleware before roleCheck.');
-    err.statusCode = 401;
-    return next(err);
-  }
+/**
+ * Middleware: Role-based access control
+ * @param {string[]} allowedRoles - Array of roles permitted to access the route
+ */
+const roleCheck = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authenticated. Use protect middleware before roleCheck.',
+      });
+    }
 
-  if (!allowedRoles.includes(req.user.role)) {
-    const err = new Error(
-      `Access denied. This action requires one of the following roles: ${allowedRoles.join(', ')}.`
-    );
-    err.statusCode = 403;
-    return next(err);
-  }
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied — this action requires one of: [${allowedRoles.join(', ')}]. Your role: ${req.user.role}`,
+      });
+    }
 
-  next();
+    next();
+  };
 };
 
 module.exports = roleCheck;

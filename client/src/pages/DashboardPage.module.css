@@ -1,0 +1,550 @@
+.page {
+  padding: 1.75rem 2.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header & Greeting */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #27273a;
+}
+
+.shopBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  margin-bottom: 0.5rem;
+}
+
+.kadeIcon {
+  font-size: 0.95rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -0.02em;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.subtitle {
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.roleHighlight {
+  color: #a78bfa;
+  font-weight: 700;
+}
+
+.quickLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.primaryActionBtn {
+  background: linear-space(90deg, #4f46e5, #6366f1);
+  background-color: #4f46e5;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.6rem 1.15rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.primaryActionBtn:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+}
+
+.secondaryActionBtn {
+  background: #1e1e2f;
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.6rem 1.15rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid #33334d;
+  transition: all 0.2s ease;
+}
+
+.secondaryActionBtn:hover {
+  background: #27273e;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 2.25rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.badgeInfo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #181825;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #2a2a3e;
+}
+
+.textLink {
+  color: #818cf8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.textLink:hover {
+  color: #a5b4fc;
+  text-decoration: underline;
+}
+
+/* 4 Summary Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.1rem;
+}
+
+.statCard {
+  border-radius: 12px;
+  padding: 1.35rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  backdrop-filter: blur(8px);
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.cardIcon {
+  font-size: 1.35rem;
+}
+
+.cardTag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.cardTagAlert {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.cardTagOwner {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.cardTagStaff {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(20, 184, 166, 0.2);
+  color: #2dd4bf;
+  border: 1px solid rgba(20, 184, 166, 0.4);
+}
+
+.blueCard {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.25), rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.indigoCard {
+  background: linear-gradient(135deg, rgba(49, 46, 129, 0.3), rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.amberCard {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.35), rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.greenCard {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.25), rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.emeraldCard {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.35), rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.tealCard {
+  background: linear-gradient(135deg, rgba(19, 78, 74, 0.3), rgba(30, 41, 59, 0.7));
+  border: 1px solid rgba(20, 184, 166, 0.35);
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0 0 0.4rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValue {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.statSub {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Revenue Breakdown for Owner */
+.revenueGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.revenueSubCard {
+  background: #161623;
+  border: 1px solid #28283d;
+  border-radius: 10px;
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.revLabel {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.revAmount {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #34d399;
+}
+
+.revCount {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Low Stock Alerts & Banner */
+.alertCountBadge {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-left: 0.5rem;
+}
+
+.healthyBanner {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  color: #e2e8f0;
+}
+
+.healthyBanner strong {
+  color: #34d399;
+  font-size: 0.95rem;
+}
+
+.healthyBanner p {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.bannerCheck {
+  font-size: 1.4rem;
+}
+
+.alertBannerContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.warningNotice {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.86rem;
+  color: #fde68a;
+}
+
+.warningIcon {
+  font-size: 1.25rem;
+}
+
+.alertGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0.85rem;
+}
+
+.alertItemCard {
+  background: #171725;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 10px;
+  padding: 0.9rem 1.15rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.alertItemMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.itemCategory {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: 0.04em;
+}
+
+.alertItemName {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.alertItemStock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+.stockMeter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.stockLevelText {
+  font-size: 0.84rem;
+  color: #fca5a5;
+}
+
+.thresholdText {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.urgencyBadge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+}
+
+/* Recent Invoices Table */
+.tableWrapper {
+  overflow-x: auto;
+  background: #141420;
+  border: 1px solid #27273c;
+  border-radius: 10px;
+}
+
+.invoiceTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.invoiceTable th {
+  background: #1a1a2c;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.15rem;
+  text-align: left;
+  border-bottom: 1px solid #27273c;
+}
+
+.invoiceTable td {
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid #1f1f32;
+  color: #cbd5e1;
+}
+
+.invoiceTable tbody tr:hover {
+  background: #181829;
+}
+
+.invNumberBadge {
+  font-family: monospace;
+  font-weight: 600;
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.customerCol strong {
+  color: #f1f5f9;
+}
+
+.dateCol {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.priceCol {
+  font-weight: 700;
+  color: #34d399;
+}
+
+.staffItemCol {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.emptyStateCard {
+  background: #141420;
+  border: 1px dashed #2d2d44;
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.emptyState {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.miniBtn {
+  background: #27273e;
+  color: #818cf8;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: 1px solid #3b3b5c;
+  transition: all 0.15s ease;
+}
+
+.miniBtn:hover {
+  background: #32324f;
+  color: #a5b4fc;
+}

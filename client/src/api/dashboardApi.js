@@ -3,6 +3,10 @@
 
 import api from './axiosInstance';
 
-export const getSharedStats = () => api.get('/dashboard/stats');
+export const getDashboardStats = () => api.get('/dashboard/stats');
+export const getSharedStats = getDashboardStats; // alias
 export const getSalesSummary = (period = 'month') =>
-  api.get('/dashboard/sales', { params: { period } });
+  api.get('/dashboard/summary', { params: { period } });
+export const getLowStock = () => api.get('/dashboard/low-stock');
+export const getRecentInvoices = (limit = 5) =>
+  api.get('/dashboard/recent-invoices', { params: { limit } });

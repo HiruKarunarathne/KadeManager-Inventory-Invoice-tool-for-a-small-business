@@ -42,7 +42,7 @@ const validateProductPayload = (body, isUpdate = false) => {
 };
 
 /**
- * Normalize payload so both price/unitPrice and stockQuantity/quantity work seamlessly with Mongoose
+ * Normalize payload so both price/unitPrice and stockQuantity/quantity work with Mongoose
  */
 const formatProductData = (body) => {
   const data = { ...body };
@@ -131,12 +131,11 @@ const updateProduct = asyncWrapper(async (req, res) => {
 
 /** DELETE /api/inventory/:id — owner only */
 const deleteProduct = asyncWrapper(async (req, res) => {
-  const product = await inventoryService.deleteProduct(req.params.id);
+  const result = await inventoryService.deleteProduct(req.params.id);
   res.status(200).json({
     success: true,
-    message: 'Product deleted successfully',
-    data: product,
-    product,
+    message: result.message,
+    data: result,
   });
 });
 

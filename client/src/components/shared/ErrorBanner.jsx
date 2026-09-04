@@ -3,18 +3,25 @@
 // Member 4 owns this file.
 //
 // Usage: <ErrorBanner message={error} onDismiss={() => setError(null)} />
+//   or:  <ErrorBanner message={error} onClose={() => setError(null)} />
 
-import { useState } from 'react';
+import styles from './ErrorBanner.module.css';
 
-const ErrorBanner = ({ message, onDismiss }) => {
+/**
+ * ErrorBanner — displays API or validation error messages.
+ * @param {string|null} message - Error message to display. Renders nothing if null.
+ * @param {Function} [onDismiss] - Optional dismiss handler (also aliased as onClose).
+ * @param {Function} [onClose]   - Alias for onDismiss.
+ */
+const ErrorBanner = ({ message, onDismiss, onClose }) => {
+  const handleClose = onDismiss || onClose;
   if (!message) return null;
 
   return (
-    <div className="error-banner" role="alert">
-      <span className="error-banner__icon">⚠️</span>
-      <span className="error-banner__message">{message}</span>
-      {onDismiss && (
-        <button className="error-banner__close" onClick={onDismiss} aria-label="Dismiss error">
+    <div className={styles.banner} role="alert">
+      <span>⚠️ {message}</span>
+      {handleClose && (
+        <button onClick={handleClose} className={styles.closeBtn} aria-label="Dismiss error">
           ✕
         </button>
       )}

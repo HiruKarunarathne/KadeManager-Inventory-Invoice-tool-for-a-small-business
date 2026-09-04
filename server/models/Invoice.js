@@ -61,14 +61,14 @@ const invoiceSchema = new mongoose.Schema(
   {
     invoiceNumber: {
       type: String,
-      required: [true, 'Invoice number is required'],
       unique: true,
-      trim: true,
+      // auto-generated before save via service layer
     },
     customerName: {
       type: String,
       trim: true,
       default: 'Walk-in Customer',
+      maxlength: [100, 'Customer name cannot exceed 100 characters'],
     },
     items: {
       type: [invoiceItemSchema],
@@ -82,6 +82,10 @@ const invoiceSchema = new mongoose.Schema(
       required: [true, 'Invoice total is required'],
       min: [0, 'Total cannot be negative'],
     },
+    notes: {
+      type: String,
+      maxlength: [300, 'Notes cannot exceed 300 characters'],
+    },
     status: {
       type: String,
       enum: {
@@ -94,10 +98,6 @@ const invoiceSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Invoice must have a creator'],
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
     },
   },
   {

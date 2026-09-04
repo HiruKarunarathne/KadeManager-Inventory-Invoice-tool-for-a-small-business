@@ -14,7 +14,8 @@ const api = axios.create({
 // Request interceptor — inject the Bearer token if available
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('kade_token');
+    // Support both localStorage key names (cross-member compatibility)
+    const token = localStorage.getItem('kade_token') || localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,6 +31,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('kade_token');
       localStorage.removeItem('kade_user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
     return Promise.reject(error);

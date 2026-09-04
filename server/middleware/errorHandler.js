@@ -3,22 +3,32 @@
 // Ensures a single failed request never crashes the whole server.
 // All errors passed via next(err) land here with a consistent response shape.
 
+/**
+ * Centralized error-handling middleware.
+ * Must be registered LAST in Express (after all routes).
+ *
+ * Formats all errors into a consistent API response:
+ *   { success: false, message: string, errors?: array, stack?: string }
+ */
 const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
+  let validationErrors = null;
 
   // Mongoose duplicate key error (e.g. duplicate email)
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
-    message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
+    message = `A record with this ${field} already exists`;
     statusCode = 409;
   }
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    message = Object.values(err.errors)
-      .map((e) => e.message)
-      .join(', ');
+    validationErrors = Object.values(err.errors).map((e) => ({
+      field: e.path,
+      message: e.message,
+    }));
+    message = 'Validation failed';
     statusCode = 422;
   }
 
@@ -34,7 +44,7 @@ const errorHandler = (err, req, res, next) => {
     statusCode = 401;
   }
   if (err.name === 'TokenExpiredError') {
-    message = 'Token expired. Please log in again.';
+    message = 'Token has expired — please log in again.';
     statusCode = 401;
   }
 
@@ -43,11 +53,15 @@ const errorHandler = (err, req, res, next) => {
     console.error('❌ Error:', err);
   }
 
-  res.status(statusCode).json({
+  const response = {
     success: false,
     message,
-    error: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-  });
+  };
+
+  if (validationErrors) response.errors = validationErrors;
+  if (process.env.NODE_ENV === 'development') response.stack = err.stack;
+
+  res.status(statusCode).json(response);
 };
 
 module.exports = errorHandler;

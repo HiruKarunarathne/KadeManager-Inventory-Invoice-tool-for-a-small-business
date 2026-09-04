@@ -2,8 +2,18 @@
 // Stores the logged-in user's profile (including role) in React context.
 // Persists session to localStorage so a refresh doesn't log the user out.
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
+/**
+ * AuthContext — stores the logged-in user and their role.
+ *
+ * Shape of `user`:
+ *   { id, name, email, role: 'owner' | 'staff' }
+ *
+ * Usage:
+ *   const { user, login, logout, loading } = useAuth();
+ *   if (user.role === 'owner') { ... }
+ */
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -13,11 +23,15 @@ export const AuthProvider = ({ children }) => {
 
   // Restore session from localStorage on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('kade_token');
-    const storedUser = localStorage.getItem('kade_user');
+    const storedToken = localStorage.getItem('kade_token') || localStorage.getItem('token');
+    const storedUser = localStorage.getItem('kade_user') || localStorage.getItem('user');
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.clear();
+      }
     }
     setLoading(false);
   }, []);
@@ -26,19 +40,24 @@ export const AuthProvider = ({ children }) => {
    * Call this after a successful login API response.
    * @param {{ token: string, user: { id, name, email, role } }} authData
    */
-  const login = (authData) => {
-    localStorage.setItem('kade_token', authData.token);
-    localStorage.setItem('kade_user', JSON.stringify(authData.user));
-    setToken(authData.token);
-    setUser(authData.user);
-  };
+  const login = useCallback(({ token: newToken, user: userData }) => {
+    // Store under both key names for cross-member compatibility
+    localStorage.setItem('kade_token', newToken);
+    localStorage.setItem('kade_user', JSON.stringify(userData));
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData);
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('kade_token');
     localStorage.removeItem('kade_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
   const isOwner = () => user?.role === 'owner';
   const isStaff = () => user?.role === 'staff';

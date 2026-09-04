@@ -63,6 +63,19 @@ const getAllUsers = async (req, res, next) => {
 };
 
 /**
+ * GET /api/auth/staff
+ * Protected — owner only (alias for getAllUsers, staff only)
+ */
+const getStaff = async (req, res, next) => {
+  try {
+    const staff = await authService.getAllStaff();
+    respond(res, 200, { success: true, data: { staff } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * DELETE /api/auth/users/:id
  * Protected — owner only (remove a staff account)
  */
@@ -75,4 +88,7 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { login, register, getMe, getAllUsers, deleteUser };
+// Alias
+const deleteStaff = deleteUser;
+
+module.exports = { login, register, getMe, getAllUsers, getStaff, deleteUser, deleteStaff };

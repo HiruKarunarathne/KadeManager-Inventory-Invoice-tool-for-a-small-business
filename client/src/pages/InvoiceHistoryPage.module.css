@@ -1,0 +1,16 @@
+.page { padding: 1.5rem 2rem; }
+.title { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.5rem; }
+.meta { font-size: 0.82rem; color: #64748b; margin-bottom: 1rem; }
+.successBanner { background: #0d948220; border: 1px solid #0d948240; border-radius: 8px; padding: 0.7rem 1rem; color: #34d399; font-size: 0.9rem; margin-bottom: 1rem; }
+.tableWrapper { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.table th { padding: 0.6rem 0.9rem; text-align: left; font-weight: 600; color: #64748b; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #2d2d44; }
+.table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #1e1e30; color: #cbd5e1; }
+.table tr:hover td { background: #1e1e30; }
+.invNum { color: #a78bfa; font-weight: 600; }
+.total { color: #34d399; font-weight: 600; }
+.emptyState { text-align: center; padding: 3rem; color: #64748b; font-style: italic; }
+.pagination { display: flex; gap: 0.5rem; margin-top: 1.5rem; }
+.pageBtn { padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid #2d2d44; background: transparent; color: #94a3b8; font-size: 0.85rem; cursor: pointer; transition: all 0.15s; }
+.pageBtn:hover { background: #2d2d44; color: #e2e8f0; }
+.pageBtn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }

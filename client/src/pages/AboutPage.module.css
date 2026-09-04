@@ -1,0 +1,430 @@
+.page {
+  padding: 2rem 2.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.65), rgba(15, 23, 42, 0.85));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 16px;
+  padding: 2.5rem 2.75rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.15);
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  margin-bottom: 1.15rem;
+}
+
+.kadeEmoji {
+  font-size: 1rem;
+}
+
+.heroTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  margin: 0 0 1rem 0;
+}
+
+.heroSubtitle {
+  font-size: 1.05rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  max-width: 840px;
+  margin: 0 0 1.75rem 0;
+}
+
+.heroSubtitle strong {
+  color: #38bdf8;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.heroPrimaryBtn {
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+}
+
+.heroPrimaryBtn:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+
+.heroSecondaryBtn {
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
+}
+
+.heroSecondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.storyCard {
+  background: #151522;
+  border: 1px solid #28283f;
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+}
+
+.storyHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+.storyIcon {
+  font-size: 2rem;
+  background: rgba(234, 179, 8, 0.15);
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.storySub {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0.15rem 0 0 0;
+}
+
+.storyBody {
+  color: #cbd5e1;
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.storyBody p {
+  margin-bottom: 0.75rem;
+}
+
+.storyBody p:last-child {
+  margin-bottom: 0;
+}
+
+/* Problem Cards */
+.crisisBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.problemGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.15rem;
+}
+
+.problemCard {
+  background: #141422;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 12px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease;
+}
+
+.problemCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.probIcon {
+  font-size: 1.25rem;
+}
+
+.probLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fca5a5;
+}
+
+.problemCard h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.6rem 0;
+  line-height: 1.35;
+}
+
+.problemCard p {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Solution Grid */
+.solutionBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.solutionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.15rem;
+}
+
+.solutionCard {
+  background: #141824;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+
+.solutionCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.solNumber {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #34d399;
+  margin-bottom: 0.5rem;
+}
+
+.solutionCard h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 0.6rem 0;
+  line-height: 1.35;
+}
+
+.solutionCard p {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.solutionCard strong {
+  color: #e2e8f0;
+}
+
+/* Matrix Table */
+.matrixCard {
+  background: #151522;
+  border: 1px solid #28283f;
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+}
+
+.matrixSub {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin: 0.35rem 0 1.25rem 0;
+}
+
+.matrixSub strong {
+  color: #a78bfa;
+}
+
+.matrixTableWrapper {
+  overflow-x: auto;
+}
+
+.matrixTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.matrixTable th {
+  background: #1a1a2b;
+  color: #f1f5f9;
+  font-weight: 700;
+  padding: 0.9rem 1.15rem;
+  text-align: left;
+  border-bottom: 2px solid #292942;
+}
+
+.colRole {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #a78bfa;
+  text-transform: uppercase;
+}
+
+.matrixTable td {
+  padding: 0.95rem 1.15rem;
+  border-bottom: 1px solid #1f1f33;
+  color: #cbd5e1;
+}
+
+.matrixTable tbody tr:hover {
+  background: #19192b;
+}
+
+.allowed {
+  color: #34d399;
+  font-weight: 700;
+}
+
+.denied {
+  color: #f87171;
+  font-weight: 700;
+}
+
+/* Bottom Bar */
+.bottomBar {
+  background: #171727;
+  border: 1px solid #2d2d47;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bottomInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bottomInfo strong {
+  color: #f1f5f9;
+  font-size: 1rem;
+}
+
+.bottomInfo span {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.bottomButtons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.bottomPrimaryBtn {
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  border-radius: 7px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.bottomPrimaryBtn:hover {
+  background: #4338ca;
+}
+
+.bottomSecondaryBtn {
+  background: #232338;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  border-radius: 7px;
+  text-decoration: none;
+  border: 1px solid #363654;
+  transition: all 0.15s ease;
+}
+
+.bottomSecondaryBtn:hover {
+  background: #2a2a44;
+  color: #ffffff;
+}

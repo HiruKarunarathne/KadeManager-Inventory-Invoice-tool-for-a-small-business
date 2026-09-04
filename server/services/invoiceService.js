@@ -1,41 +1,28 @@
 // services/invoiceService.js
-// Business logic for invoice creation, retrieval, voiding, and stock management.
+// Business logic for invoice creation and management.
 // Member 3 owns this file.
 
 const Invoice = require('../models/Invoice');
 const Product = require('../models/Product');
 
 /**
- * Generate the next sequential invoice number in the format "INV-0001".
+ * Auto-generate next sequential invoice number: INV-0001, INV-0002, etc.
  */
 const getNextInvoiceNumber = async () => {
-  const lastInvoice = await Invoice.findOne({}, { invoiceNumber: 1 })
-    .sort({ createdAt: -1 })
-    .lean();
-
-  let nextNum = 1;
-  if (lastInvoice && lastInvoice.invoiceNumber) {
-    const match = lastInvoice.invoiceNumber.match(/INV-(\d+)/);
-    if (match) {
-      nextNum = parseInt(match[1], 10) + 1;
-    }
-  }
-
-  return `INV-${String(nextNum).padStart(4, '0')}`;
+  const count = await Invoice.countDocuments();
+  return `INV-${String(count + 1).padStart(4, '0')}`;
 };
 
 /**
- * Create a new invoice.
- * Validates stock availability for ALL items in a first pass before deducting anything.
- * If any item has insufficient stock, an error is thrown and zero stock is deducted.
+ * Create a new invoice and atomically deduct stock.
  *
- * @param {Object} params
- * @param {Array<{ productId: string, quantity: number }>} params.items
- * @param {string} [params.customerName]
- * @param {string} params.createdBy - User ID of the staff/owner creating the invoice
+ * @param {object} body - { customerName, items, notes }
+ * @param {string} createdBy - User ID of the creator
  */
-const createInvoice = async ({ items, customerName, createdBy }) => {
-  if (!items || !Array.isArray(items) || items.length === 0) {
+const createInvoice = async (body, createdBy) => {
+  const { customerName, items, notes } = body;
+
+  if (!items || items.length === 0) {
     const err = new Error('Invoice must contain at least one item');
     err.statusCode = 400;
     throw err;
@@ -46,7 +33,9 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
   const fetchedProducts = [];
 
   for (const item of items) {
-    if (!item.productId) {
+    // Support both item.productId and item.product field names
+    const productId = item.productId || item.product;
+    if (!productId) {
       const err = new Error('Each item must contain a valid productId');
       err.statusCode = 400;
       throw err;
@@ -59,9 +48,9 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
       throw err;
     }
 
-    const product = await Product.findById(item.productId);
-    if (!product) {
-      const err = new Error(`Product with ID ${item.productId} not found`);
+    const product = await Product.findById(productId);
+    if (!product || !product.isActive) {
+      const err = new Error(`Product with ID ${productId} not found`);
       err.statusCode = 404;
       throw err;
     }
@@ -135,6 +124,7 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
     customerName: customerName && customerName.trim() ? customerName.trim() : 'Walk-in Customer',
     items: invoiceItems,
     total,
+    notes,
     status: 'completed',
     createdBy,
   });
@@ -143,12 +133,29 @@ const createInvoice = async ({ items, customerName, createdBy }) => {
 };
 
 /**
- * Get all invoices (newest first)
+ * Get all invoices (owner) or invoices created by this user (staff)
+ * Supports pagination via page + limit query params.
  */
-const getAllInvoices = async (filters = {}) => {
-  return await Invoice.find(filters)
-    .populate('createdBy', 'name email role')
-    .sort({ createdAt: -1 });
+const getAllInvoices = async ({ userId, role, page = 1, limit = 20 } = {}) => {
+  // If called without userId/role (legacy), return all invoices
+  const query = role === 'staff' && userId ? { createdBy: userId } : {};
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const [invoices, total] = await Promise.all([
+    Invoice.find(query)
+      .populate('createdBy', 'name email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit)),
+    Invoice.countDocuments(query),
+  ]);
+
+  return {
+    invoices,
+    total,
+    page: Number(page),
+    pages: Math.ceil(total / Number(limit)),
+  };
 };
 
 /**
@@ -187,7 +194,7 @@ const updateCustomerName = async (id, customerName) => {
 };
 
 /**
- * Void an invoice (Delete operation) and restore stock.
+ * Void an invoice and restore stock.
  * Reject if already voided.
  *
  * @param {string} id - Invoice ID
@@ -209,8 +216,9 @@ const voidInvoice = async (id, userId) => {
 
   // Restore inventory stock for each line item
   for (const item of invoice.items) {
-    if (item.productId) {
-      const product = await Product.findById(item.productId);
+    const productId = item.productId || item.product;
+    if (productId) {
+      const product = await Product.findById(productId);
       if (product) {
         product.quantity = Math.round((product.quantity + item.quantity) * 100) / 100;
         await product.save();

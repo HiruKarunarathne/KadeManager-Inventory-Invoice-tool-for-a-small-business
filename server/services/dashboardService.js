@@ -1,29 +1,97 @@
 // services/dashboardService.js
-// Business logic for dashboard/sales summary — OWNER ONLY.
+// Business logic for dashboard/sales summary.
 // Member 1 owns this file.
 
 const Invoice = require('../models/Invoice');
 const Product = require('../models/Product');
 
 /**
- * Sales summary: total revenue, invoice count, and daily breakdown.
- * This is owner-only data — enforced at the route level via roleCheck.
+ * Full dashboard statistics with role-based filtering.
+ * ─ Total active products (All roles)
+ * ─ Low-stock count and alert list (All roles)
+ * ─ Today's invoice count (All roles)
+ * ─ Sales revenue figures (Owner only)
  *
- * @param {string} period - 'today' | 'week' | 'month' (default: 'month')
+ * @param {string} userRole - 'owner' or 'staff'
+ */
+const getDashboardStats = async (userRole) => {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // 1. Product & stock counts
+  const [totalProducts, activeProducts, todayInvoicesCount] = await Promise.all([
+    Product.countDocuments({ isActive: true }),
+    Product.find({ isActive: true }).select('name category unit quantity lowStockThreshold unitPrice'),
+    Invoice.countDocuments({ createdAt: { $gte: startOfDay } }),
+  ]);
+
+  const lowStockAlerts = activeProducts.filter((p) => p.quantity <= p.lowStockThreshold);
+  const adequatelyStocked = totalProducts - lowStockAlerts.length;
+
+  const baseStats = {
+    totalProducts,
+    lowStockCount: lowStockAlerts.length,
+    adequatelyStocked,
+    todayInvoicesCount,
+    lowStockAlerts,
+  };
+
+  // 2. Financial totals: ONLY compute and attach for owner
+  if (userRole === 'owner') {
+    const [todayAgg, monthAgg, allTimeAgg] = await Promise.all([
+      Invoice.aggregate([
+        { $match: { createdAt: { $gte: startOfDay } } },
+        { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } },
+      ]),
+      Invoice.aggregate([
+        { $match: { createdAt: { $gte: startOfMonth } } },
+        { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } },
+      ]),
+      Invoice.aggregate([
+        { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    return {
+      ...baseStats,
+      sales: {
+        today: {
+          revenue: todayAgg[0]?.total ?? 0,
+          invoices: todayAgg[0]?.count ?? 0,
+        },
+        thisMonth: {
+          revenue: monthAgg[0]?.total ?? 0,
+          invoices: monthAgg[0]?.count ?? 0,
+        },
+        allTime: {
+          revenue: allTimeAgg[0]?.total ?? 0,
+          invoices: allTimeAgg[0]?.count ?? 0,
+        },
+      },
+    };
+  }
+
+  // Staff gets stock and invoice activity without revenue figures
+  return baseStats;
+};
+
+/**
+ * Sales summary: total revenue and invoice count, owner-only.
  */
 const getSalesSummary = async (period = 'month') => {
   const now = new Date();
-  let startDate;
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  let startDate;
   if (period === 'today') {
-    startDate = new Date(now.setHours(0, 0, 0, 0));
+    startDate = startOfDay;
   } else if (period === 'week') {
     startDate = new Date(now);
     startDate.setDate(startDate.getDate() - 7);
   } else {
-    startDate = new Date(now);
-    startDate.setDate(1); // First day of current month
-    startDate.setHours(0, 0, 0, 0);
+    startDate = startOfMonth;
   }
 
   const invoices = await Invoice.find({ createdAt: { $gte: startDate } });
@@ -47,15 +115,14 @@ const getSalesSummary = async (period = 'month') => {
 };
 
 /**
- * Dashboard stats visible to ALL logged-in users (owner + staff)
+ * Dashboard stats visible to ALL logged-in users (owner + staff) — legacy alias
  */
 const getSharedStats = async () => {
-  const totalProducts = await Product.countDocuments();
-  const lowStockProducts = await Product.find({
-    $expr: { $lte: ['$quantity', '$lowStockThreshold'] },
-  }).select('name quantity unit lowStockThreshold');
+  const totalProducts = await Product.countDocuments({ isActive: true });
+  const lowStockProducts = await Product.find({ isActive: true }).then((products) =>
+    products.filter((p) => p.quantity <= p.lowStockThreshold)
+  );
 
-  // Total invoices today
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const invoicesToday = await Invoice.countDocuments({ createdAt: { $gte: todayStart } });
@@ -63,4 +130,42 @@ const getSharedStats = async () => {
   return { totalProducts, lowStockCount: lowStockProducts.length, lowStockProducts, invoicesToday };
 };
 
-module.exports = { getSalesSummary, getSharedStats };
+/**
+ * Low-stock alerts — visible to both roles
+ */
+const getLowStockAlerts = async () => {
+  const products = await Product.find({ isActive: true });
+  return products.filter((p) => p.quantity <= p.lowStockThreshold);
+};
+
+/**
+ * Recent invoices for a quick-view widget
+ * Role-aware: excludes financial figures for staff
+ */
+const getRecentInvoices = async (limit = 5, userRole = 'owner') => {
+  const invoices = await Invoice.find()
+    .populate('createdBy', 'name')
+    .sort({ createdAt: -1 })
+    .limit(Number(limit));
+
+  if (userRole !== 'owner') {
+    return invoices.map((inv) => ({
+      _id: inv._id,
+      invoiceNumber: inv.invoiceNumber,
+      customerName: inv.customerName,
+      createdAt: inv.createdAt,
+      itemCount: inv.items ? inv.items.reduce((sum, item) => sum + item.quantity, 0) : 0,
+      createdBy: inv.createdBy,
+    }));
+  }
+
+  return invoices;
+};
+
+module.exports = {
+  getDashboardStats,
+  getSalesSummary,
+  getSharedStats,
+  getLowStockAlerts,
+  getRecentInvoices,
+};

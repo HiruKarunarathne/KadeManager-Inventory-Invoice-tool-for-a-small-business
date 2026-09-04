@@ -34,7 +34,7 @@ const users = [
 const products = [
   {
     name: 'Samba Rice',
-    category: 'Dry Goods',
+    category: 'Grocery',
     unit: 'kg',
     unitType: 'measured',
     quantity: 200,
@@ -43,7 +43,7 @@ const products = [
   },
   {
     name: 'Dhal (Red Lentils)',
-    category: 'Dry Goods',
+    category: 'Grocery',
     unit: 'kg',
     unitType: 'measured',
     quantity: 80,
@@ -52,8 +52,8 @@ const products = [
   },
   {
     name: 'Coconut Oil',
-    category: 'Cooking Oil',
-    unit: 'l',
+    category: 'Grocery',
+    unit: 'L',
     unitType: 'measured',
     quantity: 50,
     unitPrice: 620,
@@ -61,7 +61,7 @@ const products = [
   },
   {
     name: 'Milo Tin (400g)',
-    category: 'Beverages',
+    category: 'Beverage',
     unit: 'tin',
     unitType: 'countable',
     quantity: 25,
@@ -70,7 +70,7 @@ const products = [
   },
   {
     name: 'Laojee Tea (100 bags)',
-    category: 'Beverages',
+    category: 'Beverage',
     unit: 'pack',
     unitType: 'countable',
     quantity: 60,
@@ -97,7 +97,7 @@ const products = [
   },
   {
     name: 'Sunlight Soap (90g)',
-    category: 'Cleaning',
+    category: 'Household',
     unit: 'pcs',
     unitType: 'countable',
     quantity: 50,
@@ -106,7 +106,7 @@ const products = [
   },
   {
     name: 'Sugar (White)',
-    category: 'Dry Goods',
+    category: 'Grocery',
     unit: 'kg',
     unitType: 'measured',
     quantity: 3,           // intentionally low to demo low-stock alert
@@ -115,8 +115,8 @@ const products = [
   },
   {
     name: 'Elephant Ginger Beer (330ml)',
-    category: 'Beverages',
-    unit: 'can',
+    category: 'Beverage',
+    unit: 'bottle',
     unitType: 'countable',
     quantity: 72,
     unitPrice: 130,

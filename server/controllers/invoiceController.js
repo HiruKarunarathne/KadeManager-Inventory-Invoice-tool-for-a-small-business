@@ -12,10 +12,7 @@ const respond = (res, statusCode, data) => res.status(statusCode).json(data);
  */
 const createInvoice = async (req, res, next) => {
   try {
-    const invoice = await invoiceService.createInvoice({
-      ...req.body,
-      createdBy: req.user._id,
-    });
+    const invoice = await invoiceService.createInvoice(req.body, req.user._id);
     respond(res, 201, {
       success: true,
       message: 'Invoice created successfully',
@@ -28,20 +25,29 @@ const createInvoice = async (req, res, next) => {
 
 /**
  * GET /api/invoices
- * Get all invoices (owner + staff)
+ * Get all invoices; owner sees all, staff sees only their own.
+ * Supports ?page=&limit= query params
  */
 const getAllInvoices = async (req, res, next) => {
   try {
-    const invoices = await invoiceService.getAllInvoices(req.query);
+    const result = await invoiceService.getAllInvoices({
+      userId: req.user._id,
+      role: req.user.role,
+      page: req.query.page,
+      limit: req.query.limit,
+    });
     respond(res, 200, {
       success: true,
       message: 'Invoices retrieved successfully',
-      data: invoices,
+      data: result,
     });
   } catch (err) {
     next(err);
   }
 };
+
+// Alias for Dashboard-style imports
+const getInvoices = getAllInvoices;
 
 /**
  * GET /api/invoices/:id
@@ -59,6 +65,9 @@ const getInvoiceById = async (req, res, next) => {
     next(err);
   }
 };
+
+// Alias
+const getInvoice = getInvoiceById;
 
 /**
  * PATCH /api/invoices/:id/void
@@ -101,7 +110,9 @@ const updateCustomerName = async (req, res, next) => {
 module.exports = {
   createInvoice,
   getAllInvoices,
+  getInvoices,
   getInvoiceById,
+  getInvoice,
   voidInvoice,
   updateCustomerName,
 };

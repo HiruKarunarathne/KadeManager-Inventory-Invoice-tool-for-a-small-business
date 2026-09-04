@@ -1,36 +1,58 @@
 // controllers/dashboardController.js
-// Handles HTTP req/res for dashboard/stats endpoints.
+// Handles HTTP request/response cycle for dashboard endpoints.
 // Member 1 owns this file.
 
+const asyncWrapper = require('../middleware/asyncWrapper');
 const dashboardService = require('../services/dashboardService');
-
-const respond = (res, statusCode, data) => res.status(statusCode).json(data);
 
 /**
  * GET /api/dashboard/stats
- * Accessible by ALL authenticated users — shared overview stats
+ * Both roles — returns summary cards (revenue gated for owner only)
  */
-const getSharedStats = async (req, res, next) => {
-  try {
-    const stats = await dashboardService.getSharedStats();
-    respond(res, 200, { success: true, message: 'Dashboard stats retrieved', data: stats });
-  } catch (err) {
-    next(err);
-  }
-};
+const getDashboardStats = asyncWrapper(async (req, res) => {
+  const stats = await dashboardService.getDashboardStats(req.user.role);
+  res.status(200).json({ success: true, data: { stats } });
+});
 
 /**
- * GET /api/dashboard/sales
- * OWNER ONLY — full sales summary with revenue breakdown
- * Query param: ?period=today|week|month (default: month)
+ * GET /api/dashboard/stats — legacy alias
  */
-const getSalesSummary = async (req, res, next) => {
-  try {
-    const summary = await dashboardService.getSalesSummary(req.query.period);
-    respond(res, 200, { success: true, message: 'Sales summary retrieved', data: summary });
-  } catch (err) {
-    next(err);
-  }
-};
+const getSharedStats = getDashboardStats;
 
-module.exports = { getSharedStats, getSalesSummary };
+/**
+ * GET /api/dashboard/summary (owner only)
+ * Sales revenue + invoice counts with daily breakdown
+ */
+const getSalesSummary = asyncWrapper(async (req, res) => {
+  const summary = await dashboardService.getSalesSummary(req.query.period);
+  res.status(200).json({ success: true, data: { summary } });
+});
+
+/**
+ * GET /api/dashboard/low-stock
+ * Both roles — products at or below lowStockThreshold
+ */
+const getLowStock = asyncWrapper(async (req, res) => {
+  const alerts = await dashboardService.getLowStockAlerts();
+  res.status(200).json({
+    success: true,
+    data: { alerts, count: alerts.length },
+  });
+});
+
+/**
+ * GET /api/dashboard/recent-invoices
+ * Both roles — last N invoices for quick view (totals hidden from staff)
+ */
+const getRecentInvoices = asyncWrapper(async (req, res) => {
+  const invoices = await dashboardService.getRecentInvoices(req.query.limit, req.user.role);
+  res.status(200).json({ success: true, data: { invoices } });
+});
+
+module.exports = {
+  getDashboardStats,
+  getSharedStats,
+  getSalesSummary,
+  getLowStock,
+  getRecentInvoices,
+};

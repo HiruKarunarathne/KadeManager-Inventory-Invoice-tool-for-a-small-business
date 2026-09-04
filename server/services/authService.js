@@ -7,6 +7,8 @@ const User = require('../models/User');
 
 /**
  * Generate a signed JWT for a user
+ * @param {string} userId - MongoDB user _id
+ * @returns {string} JWT token
  */
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -17,17 +19,16 @@ const generateToken = (userId) => {
 /**
  * Register a new user (owner-only action — see route for RBAC)
  */
-const registerUser = async ({ name, email, password, role }) => {
+const registerUser = async ({ name, email, password, role = 'staff' }) => {
   // Check for duplicate email
-  const existing = await User.findOne({ email });
+  const existing = await User.findOne({ email: email.toLowerCase() });
   if (existing) {
     const err = new Error('A user with this email already exists');
     err.statusCode = 409;
     throw err;
   }
 
-  const user = await User.create({ name, email, password, role: role || 'staff' });
-
+  const user = await User.create({ name, email, password, role });
   const token = generateToken(user._id);
 
   return {
@@ -52,7 +53,7 @@ const loginUser = async ({ email, password }) => {
   }
 
   // Explicitly include password (it's select:false in schema)
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
   if (!user) {
     const err = new Error('Invalid email or password');
     err.statusCode = 401;
@@ -80,7 +81,7 @@ const loginUser = async ({ email, password }) => {
 };
 
 /**
- * Get all staff users (owner-only action)
+ * Get all users (owner-only action)
  */
 const getAllUsers = async () => {
   const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -88,16 +89,32 @@ const getAllUsers = async () => {
 };
 
 /**
- * Delete a staff user by ID (owner-only action)
+ * Get all staff users (owner-only action)
+ */
+const getAllStaff = async () => {
+  return User.find({ role: 'staff' }).select('-password').sort({ createdAt: -1 });
+};
+
+/**
+ * Delete a user by ID (owner-only action)
  */
 const deleteUser = async (userId) => {
-  const user = await User.findByIdAndDelete(userId);
+  const user = await User.findById(userId);
   if (!user) {
     const err = new Error('User not found');
     err.statusCode = 404;
     throw err;
   }
+  if (user.role === 'owner') {
+    const err = new Error('Cannot delete the owner account');
+    err.statusCode = 403;
+    throw err;
+  }
+  await user.deleteOne();
   return { message: 'User deleted successfully' };
 };
 
-module.exports = { registerUser, loginUser, getAllUsers, deleteUser };
+// Alias for backward compatibility
+const deleteStaffUser = deleteUser;
+
+module.exports = { registerUser, loginUser, getAllUsers, getAllStaff, deleteUser, deleteStaffUser };

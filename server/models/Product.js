@@ -16,13 +16,13 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Category is required'],
       trim: true,
-      // e.g. 'Dry Goods', 'Beverages', 'Dairy', 'Cleaning', 'Snacks', etc.
+      // e.g. 'Grocery', 'Beverage', 'Dairy', 'Bakery', 'Household', 'Personal Care', 'Snacks', 'Other'
     },
     unit: {
       type: String,
       required: [true, 'Unit is required'],
       trim: true,
-      // e.g. 'kg', 'g', 'l', 'ml', 'pcs', 'pack', 'bottle', 'tin', 'can'
+      // e.g. 'kg', 'g', 'L', 'ml', 'pcs', 'pack', 'bottle', 'tin', 'can'
     },
     unitType: {
       type: String,
