@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 // Sub-schema for each line item in an invoice
 const invoiceItemSchema = new mongoose.Schema(
   {
-    product: {
+    productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
       required: [true, 'Product reference is required'],
@@ -15,7 +15,8 @@ const invoiceItemSchema = new mongoose.Schema(
     productName: {
       // Snapshot of name at time of sale (in case product is edited later)
       type: String,
-      required: true,
+      required: [true, 'Product name is required'],
+      trim: true,
     },
     quantity: {
       type: Number,
@@ -28,17 +29,33 @@ const invoiceItemSchema = new mongoose.Schema(
       required: [true, 'Unit price is required'],
       min: [0, 'Unit price cannot be negative'],
     },
-    subtotal: {
+    lineTotal: {
       type: Number,
-      required: true,
-      min: [0, 'Subtotal cannot be negative'],
+      required: [true, 'Line total is required'],
+      min: [0, 'Line total cannot be negative'],
     },
   },
-  { _id: false }
+  { _id: false, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+// Virtual alias: subtotal -> lineTotal (for compatibility with existing UI components)
+invoiceItemSchema.virtual('subtotal').get(function () {
+  return this.lineTotal;
+});
+
+// Virtual alias: product -> productId
+invoiceItemSchema.virtual('product').get(function () {
+  return this.productId;
+});
 
 const invoiceSchema = new mongoose.Schema(
   {
+    invoiceNumber: {
+      type: String,
+      required: [true, 'Invoice number is required'],
+      unique: true,
+      trim: true,
+    },
     customerName: {
       type: String,
       trim: true,
@@ -56,14 +73,28 @@ const invoiceSchema = new mongoose.Schema(
       required: [true, 'Invoice total is required'],
       min: [0, 'Total cannot be negative'],
     },
+    status: {
+      type: String,
+      enum: {
+        values: ['completed', 'voided'],
+        message: 'Status must be either completed or voided',
+      },
+      default: 'completed',
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Invoice must have a creator'],
     },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
-    timestamps: true, // createdAt is the sale timestamp
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
