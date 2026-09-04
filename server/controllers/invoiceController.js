@@ -39,7 +39,13 @@ const getAllInvoices = async (req, res, next) => {
     respond(res, 200, {
       success: true,
       message: 'Invoices retrieved successfully',
-      data: result,
+      data: result.invoices,
+      invoices: result.invoices,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        pages: result.pages,
+      },
     });
   } catch (err) {
     next(err);
